@@ -1,0 +1,5 @@
+web3==5.29.0
+mnemonic==0.20
+bip32utils==0.3.post4
+eth-account==0.6.1
+eth-keyfile==0.6.0

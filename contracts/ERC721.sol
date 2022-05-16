@@ -26,6 +26,9 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     // Token symbol
     string private _symbol;
 
+    // Base URI
+    string private _baseURI;
+
     // Mapping from token ID to owner address
     mapping(uint256 => address) private _owners;
 
@@ -41,9 +44,10 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-    constructor(string memory name_, string memory symbol_) {
+    constructor(string memory name_, string memory symbol_, string memory baseURI_) {
         _name = name_;
         _symbol = symbol_;
+        _baseURI = baseURI_;
     }
 
     /**
@@ -93,17 +97,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
-        string memory baseURI = _baseURI();
-        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
-    }
-
-    /**
-     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
-     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
-     * by default, can be overridden in child contracts.
-     */
-    function _baseURI() internal view virtual returns (string memory) {
-        return "";
+        return bytes(_baseURI).length > 0 ? string(abi.encodePacked(_baseURI, tokenId.toString(), ".json")) : "";
     }
 
     /**
@@ -180,6 +174,13 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     ) public virtual override {
         require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
         _safeTransfer(from, to, tokenId, data);
+    }
+
+    function mint(
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        _safeMint(to, tokenId);
     }
 
     /**

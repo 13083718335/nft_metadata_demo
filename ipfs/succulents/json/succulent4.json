@@ -1,0 +1,28 @@
+{
+    "id":4,
+    "name":"Succulent #4",
+    "description":"Echeveria chihuahuaensis Poelln.",
+    "attributes":[
+        {
+            "trait_type":"name",
+            "value":"Echeveria chihuahuaensis Poelln."
+        },
+        {
+            "trait_type":"family",
+            "value":"Crassulaceae"
+        },
+        {
+            "trait_type":"genus",
+            "value":"Echeveria DC."
+        },
+        {
+            "trait_type":"species",
+            "value":"Echeveria chihuahuaensis Poelln."
+        },
+        {
+            "trait_type":"chinese",
+            "value":"吉娃莲"
+        }
+    ],
+    "image":"ipfs://QmP8YCZNUGaGZtwFYTnD88Ur1Sp98ZbTR1JFan5x5sKfNE/succulents/succulent4.png"
+}

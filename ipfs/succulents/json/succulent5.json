@@ -1,0 +1,28 @@
+{
+    "id":5,
+    "name":"Succulent #5",
+    "description":"Echeveria peacockii 'Desmetiana'.",
+    "attributes":[
+        {
+            "trait_type":"name",
+            "value":"Echeveria peacockii 'Desmetiana'"
+        },
+        {
+            "trait_type":"family",
+            "value":"Crassulaceae"
+        },
+        {
+            "trait_type":"genus",
+            "value":"Echeveria DC."
+        },
+        {
+            "trait_type":"species",
+            "value":"Echeveria peacockii Croucher"
+        },
+        {
+            "trait_type":"chinese",
+            "value":"蓝石莲"
+        }
+    ],
+    "image":"ipfs://QmP8YCZNUGaGZtwFYTnD88Ur1Sp98ZbTR1JFan5x5sKfNE/succulents/succulent5.png"
+}
