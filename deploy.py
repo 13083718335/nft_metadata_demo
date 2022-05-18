@@ -22,7 +22,8 @@ ERC1155_NAME = 'ERC1155'
 # 创建参数
 ERC721_PARAM_NAME = 'YoFo'
 ERC721_PARAM_SYMBOL = 'YOFO'
-ERC721_PARAM_BASE_URI = 'ipfs://QmYBNaRPN8xwAQ8ovyvHXS8KPtc16izMNkZUMwCvX5VdHg/succulents/succulent'
+
+ERC1155_PARAM_URI = 'ipfs://QmYBNaRPN8xwAQ8ovyvHXS8KPtc16izMNkZUMwCvX5VdHg/succulents/succulent'
 
 DEFAULT_FEE_LIMIT = 5000000
 GAS_PRICE = 500 * (10 ** 9)
@@ -85,11 +86,25 @@ def main():
         ERC721_NAME,
         ERC721_PARAM_NAME,
         ERC721_PARAM_SYMBOL,
-        ERC721_PARAM_BASE_URI,
         gas=DEFAULT_FEE_LIMIT,
         gas_price=GAS_PRICE
     )
     print('erc721 address: {},\ntx hash: {}\nstatus: {}'.format(
+        aggregator.get('address'),
+        aggregator.get('tx_hash'),
+        aggregator.get('status')
+    ))
+
+    print('Deploy ERC1155: ')
+    aggregator = deploy(
+        private_key_bytes,
+        w3,
+        ERC1155_NAME,
+        ERC1155_PARAM_URI,
+        gas=DEFAULT_FEE_LIMIT,
+        gas_price=GAS_PRICE
+    )
+    print('erc1155 address: {},\ntx hash: {}\nstatus: {}'.format(
         aggregator.get('address'),
         aggregator.get('tx_hash'),
         aggregator.get('status')

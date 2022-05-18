@@ -1,4 +1,5 @@
 from typing import Dict
+from typing import List
 from typing import Tuple
 
 from web3 import Web3
@@ -27,8 +28,8 @@ CONTRACT_PATH = './abi'
 ERC721_NAME = 'ERC721'
 ERC1155_NAME = 'ERC1155'
 
-ERC721_ADDRESS = Web3.toChecksumAddress('0x6c2d4879271F8469f4b34780dcD5D215dC977e3e')
-ERC1155_ADDRESS = Web3.toChecksumAddress('0x08E05a8bE41cB8a82Be3eC92931Fe13d86405FEA')
+ERC721_ADDRESS = Web3.toChecksumAddress('0x9106dc5211D7f5F3A4CE0e25bC9A66D35317336D')
+ERC1155_ADDRESS = Web3.toChecksumAddress('0x96c7F607601dB45d2A21159d8851057C14910d10')
 
 TX_STATUS_SUCCESS = 1
 
@@ -101,27 +102,53 @@ def signed_and_send_transaction(
 
 
 def print_tx_result(result: Dict):
-    print('tx_hash: {}\n'
-          'success: {}'.format(result['tx_hash'], result['success']))
+    print('tx_hash: {}\nsuccess: {}'.format(result['tx_hash'], result['success']))
 
 
-def erc721_mint(w3: Web3, account: LocalAccount, token_id: int, to: ChecksumAddress = None) -> Dict:
+def erc721_mint(w3: Web3, account: LocalAccount, token_id: int, uri: str, to: ChecksumAddress = None) -> Dict:
     """ERC721增发Token"""
     if not to:
         to = account.address
-    params = (to, token_id)
+    params = (to, token_id, uri)
 
     return signed_and_send_transaction(w3, account, get_erc721_contract(w3), 'mint', params)
+
+
+def erc1155_mint_batch(
+        w3: Web3,
+        account: LocalAccount,
+        token_ids: List[int],
+        amounts: List[int],
+        to: ChecksumAddress = None
+) -> Dict:
+    """ERC1155批量增发Token"""
+    if not to:
+        to = account.address
+    params = (to, token_ids, amounts)
+
+    return signed_and_send_transaction(w3, account, get_erc1155_contract(w3), 'mintBatch', params)
 
 
 def main():
     w3 = get_web3_instance(HTTP_PROVIDER)
     account = load_keystore(KEYFILE, PASSWORD)
 
-    nft_count = 7
+    erc721_metadata_uris = [
+        'https://link.ap1.storjshare.io/s/juetcgn2mcf7pcsz5l2fxnqhsrrq/succulents/json/succulent1.json?download=1',
+        'https://link.ap1.storjshare.io/s/jwbpjgdomzpc3jg2jtryeic57seq/succulents/json/succulent2.json?download=1',
+        'https://link.ap1.storjshare.io/s/jv3jjaofhkwrihaitm3574rf6dfq/succulents/json/succulent3.json?download=1',
+        'https://link.ap1.storjshare.io/s/jucqn7pscmojpkisbdwnovg53s7a/succulents/json/succulent4.json?download=1',
+        'https://link.ap1.storjshare.io/s/jwyk5os6xg4bi3epnisocqlszeza/succulents/json/succulent5.json?download=1',
+        'https://link.ap1.storjshare.io/s/jv3z4fucwqgwaiddqcgx2tfpmyka/succulents/json/succulent6.json?download=1',
+        'https://link.ap1.storjshare.io/s/jxpaa2zbydoerwmro64j7mhutkhq/succulents/json/succulent7.json?download=1'
+    ]
+    for index, uri in enumerate(erc721_metadata_uris):
+        print_tx_result(erc721_mint(w3, account, index + 1, uri))
 
-    for index in range(1, nft_count + 1):
-        print_tx_result(erc721_mint(w3, account, index))
+    nft_count = 7
+    erc1155_ids = [index for index in range(1, nft_count + 1)]
+    erc1155_amounts = [1 for _ in range(nft_count)]
+    print_tx_result(erc1155_mint_batch(w3, account, erc1155_ids, erc1155_amounts))
 
 
 if __name__ == '__main__':

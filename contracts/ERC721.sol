@@ -26,8 +26,8 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     // Token symbol
     string private _symbol;
 
-    // Base URI
-    string private _baseURI;
+    // Mapping from token ID to URI;
+    mapping(uint256 => string) private _uris;
 
     // Mapping from token ID to owner address
     mapping(uint256 => address) private _owners;
@@ -44,10 +44,9 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-    constructor(string memory name_, string memory symbol_, string memory baseURI_) {
+    constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
-        _baseURI = baseURI_;
     }
 
     /**
@@ -97,7 +96,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
-        return bytes(_baseURI).length > 0 ? string(abi.encodePacked(_baseURI, tokenId.toString(), ".json")) : "";
+        return _uris[tokenId];
     }
 
     /**
@@ -178,9 +177,10 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
     function mint(
         address to,
-        uint256 tokenId
-    ) public virtual override {
-        _safeMint(to, tokenId);
+        uint256 tokenId,
+        string memory uri
+    ) public virtual {
+        _safeMint(to, tokenId, uri, "");
     }
 
     /**
@@ -237,29 +237,16 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     /**
-     * @dev Safely mints `tokenId` and transfers it to `to`.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must not exist.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _safeMint(address to, uint256 tokenId) internal virtual {
-        _safeMint(to, tokenId, "");
-    }
-
-    /**
      * @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
      * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
      */
     function _safeMint(
         address to,
         uint256 tokenId,
+        string memory uri,
         bytes memory data
     ) internal virtual {
-        _mint(to, tokenId);
+        _mint(to, tokenId, uri);
         require(
             _checkOnERC721Received(address(0), to, tokenId, data),
             "ERC721: transfer to non ERC721Receiver implementer"
@@ -278,7 +265,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      *
      * Emits a {Transfer} event.
      */
-    function _mint(address to, uint256 tokenId) internal virtual {
+    function _mint(address to, uint256 tokenId, string memory uri) internal virtual {
         require(to != address(0), "ERC721: mint to the zero address");
         require(!_exists(tokenId), "ERC721: token already minted");
 
@@ -286,6 +273,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
         _balances[to] += 1;
         _owners[tokenId] = to;
+        _uris[tokenId] = uri;
 
         emit Transfer(address(0), to, tokenId);
 
@@ -312,6 +300,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
         _balances[owner] -= 1;
         delete _owners[tokenId];
+        delete _uris[tokenId];
 
         emit Transfer(owner, address(0), tokenId);
 

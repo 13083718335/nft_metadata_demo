@@ -8,6 +8,7 @@ import "./IERC1155Receiver.sol";
 import "./IERC1155MetadataURI.sol";
 import "./Address.sol";
 import "./Context.sol";
+import "./Strings.sol";
 import "./ERC165.sol";
 
 /**
@@ -19,9 +20,13 @@ import "./ERC165.sol";
  */
 contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     using Address for address;
+    using Strings for uint256;
 
     // Mapping from token ID to account balances
     mapping(uint256 => mapping(address => uint256)) private _balances;
+
+    // Mapping for token ID to supply
+    mapping(uint256 => uint256) private _supply;
 
     // Mapping from account to operator approvals
     mapping(address => mapping(address => bool)) private _operatorApprovals;
@@ -56,8 +61,9 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
      * Clients calling this function must replace the `\{id\}` substring with the
      * actual token type ID.
      */
-    function uri(uint256) public view virtual override returns (string memory) {
-        return _uri;
+    function uri(uint256 id) public view virtual override returns (string memory) {
+        require(exists(id), "ERC1155MetadataURI: URI query for nonexistent token");
+        return bytes(_uri).length > 0 ? string(abi.encodePacked(_uri, id.toString(), ".json")) : "";
     }
 
     /**
@@ -95,6 +101,10 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         }
 
         return batchBalances;
+    }
+
+    function totalSupply(uint256 _id) public view returns (uint256) {
+        return _supply[_id];
     }
 
     /**
@@ -143,6 +153,26 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
             "ERC1155: transfer caller is not owner nor approved"
         );
         _safeBatchTransferFrom(from, to, ids, amounts, data);
+    }
+
+    function mint(
+        address to,
+        uint256 id,
+        uint256 amount
+    ) public virtual {
+        _mint(to, id, amount, "");
+    }
+
+    function mintBatch(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) public virtual {
+        _mintBatch(to, ids, amounts, "");
+    }
+
+    function exists(uint256 _id) public view returns (bool) {
+        return _supply[_id] > 0;
     }
 
     /**
@@ -278,6 +308,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
 
         _balances[id][to] += amount;
+        _supply[id] += amount;
         emit TransferSingle(operator, address(0), to, id, amount);
 
         _afterTokenTransfer(operator, address(0), to, ids, amounts, data);
@@ -311,6 +342,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         for (uint256 i = 0; i < ids.length; i++) {
             _balances[ids[i]][to] += amounts[i];
+            _supply[ids[i]] += amounts[i];
         }
 
         emit TransferBatch(operator, address(0), to, ids, amounts);
@@ -348,6 +380,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         unchecked {
             _balances[id][from] = fromBalance - amount;
         }
+        _supply[id] -= amount;
 
         emit TransferSingle(operator, from, address(0), id, amount);
 
@@ -384,6 +417,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
             unchecked {
                 _balances[id][from] = fromBalance - amount;
             }
+            _supply[id] -= amount;
         }
 
         emit TransferBatch(operator, from, address(0), ids, amounts);
